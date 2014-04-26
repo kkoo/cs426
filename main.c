@@ -8,7 +8,9 @@ int main(int argc, char **argv)
 	printf("Ciphertext: %s\n",cipher);
 	char *plain=des_decrypt("keykeykey",cipher,strlen(cipher));
 	printf("Plaintext: %s\n",plain);
-
+	char *sha=sha1_digest(cipher);
+	printf("Hash: %s\n",sha);
+	
 	return 0;
 
 }
