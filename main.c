@@ -1,3 +1,4 @@
+// This is a test for encryption/decryption functions
 #include <stdio.h>
 #include <string.h>
 
