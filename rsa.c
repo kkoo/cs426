@@ -18,6 +18,7 @@ char* rsa_encrypt(char *msg, char *keyfile)
 	RSA_public_encrypt(rsa_len,msg,ret,rsa,RSA_NO_PADDING);
 
 	fclose(fp);
+	RSA_free(rsa);
 	return ret;
 
 }
@@ -35,6 +36,37 @@ char* rsa_decrypt(char *msg, char *keyfile)
 	RSA_private_decrypt(rsa_len,msg,ret,rsa,RSA_NO_PADDING);
 
 	fclose(fp);
+	RSA_free(rsa);
 	return ret;
+
+}
+
+char *rsa_sign(char *msg, char *keyfile)
+{
+	int slen;
+	RSA *rsa;
+	FILE *fp=fopen(keyfile,"rb");
+	rsa=PEM_read_RSAPrivateKey(fp,NULL,NULL,NULL);
+	char *ret=(char *)calloc(RSA_size(rsa),sizeof(unsigned char));
+	char *digest=sha1_digest(msg);
+	RSA_sign(NID_sha1,(unsigned char *)msg,strlen(msg),(unsigned char *)ret,&slen,rsa);
+	fclose(fp);
+	RSA_free(rsa);
+	return ret;
+}
+
+int rsa_verify(char *msg, char *sig, char *keyfile)
+// returns 0 if failed, 1 if successful
+{
+	int slen;
+	RSA *rsa;
+	FILE *fp=fopen(keyfile,"rb");
+	rsa=PEM_read_RSA_PUBKEY(fp,NULL,NULL,NULL);
+	if(!RSA_verify(NID_sha1,(unsigned char *)msg,strlen(msg),(unsigned char *)sig,strlen(sig),rsa)) 
+		return 0;
+
+	fclose(fp);
+	RSA_free(rsa);
+	return 1;
 
 }

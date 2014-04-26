@@ -9,12 +9,17 @@ int main(int argc, char **argv)
 	printf("Ciphertext: %s\n",cipher);
 	char *plain=des_decrypt("keykeykey",cipher,strlen(cipher));
 	printf("Plaintext: %s\n",plain);
-	char *sha=sha1_digest(cipher);
+	char *sha=sha1_digest(hello);
 	printf("Hash: %s\n",sha);
-	char *rsa=rsa_encrypt(plain,"ku_pub.pem");
-	printf("RSA cipher: %s\n",rsa);
-	char *rsaplain=rsa_decrypt(rsa,"ku_priv.pem");
-	printf("RSA decrypt result: %s\n",rsaplain);
+	char *rsacipher=rsa_encrypt(plain,"ku_pub.pem");
+	printf("RSA cipher: %s\n",rsacipher);
+	char *rsaplain=rsa_decrypt(rsacipher,"ku_priv.pem");
+	printf("RSA decryption result: %s\n",rsaplain);
+	char *sig=rsa_sign(plain,"ku_priv.pem");
+	printf("RSA signature: %s\n",sig);
+	int v=rsa_verify(plain,sig,"ku_pub.pem");
+	if(v==0) printf("Verified!\n"); else printf ("Verification failed!\n");
+
 	return 0;
 
 }
