@@ -1,6 +1,5 @@
 /*
  * DES encryption and decryption
- * Acknowledgement: code from http://www.codealias.info/technotes/des_encryption_using_openssl_a_simple_example
  */
 
 #include <stdio.h>
@@ -10,10 +9,9 @@
  
  
 char *
-Encrypt( char *Key, char *Msg, int size)
-{
- 
-        static char*    Res;
+des_encrypt( char *Key, char *Msg, int size)
+{	
+ 	static char*    Res;
         int             n=0;
         DES_cblock      Key2;
         DES_key_schedule schedule;
@@ -21,7 +19,7 @@ Encrypt( char *Key, char *Msg, int size)
         Res = ( char * ) malloc( size );
  
         /* Prepare the key for use with DES_cfb64_encrypt */
-        memcpy( Key2, Key,8);
+	DES_string_to_key(Key,&Key2);
         DES_set_odd_parity( &Key2 );
         DES_set_key_checked( &Key2, &schedule );
  
@@ -34,10 +32,9 @@ Encrypt( char *Key, char *Msg, int size)
  
  
 char *
-Decrypt( char *Key, char *Msg, int size)
+des_decrypt( char *Key, char *Msg, int size)
 {
- 
-        static char*    Res;
+ 	static char*    Res;
         int             n=0;
  
         DES_cblock      Key2;
@@ -46,7 +43,7 @@ Decrypt( char *Key, char *Msg, int size)
         Res = ( char * ) malloc( size );
  
         /* Prepare the key for use with DES_cfb64_encrypt */
-        memcpy( Key2, Key,8);
+        DES_string_to_key(Key, &Key2);
         DES_set_odd_parity( &Key2 );
         DES_set_key_checked( &Key2, &schedule );
  
@@ -55,6 +52,5 @@ Decrypt( char *Key, char *Msg, int size)
                            size, &schedule, &Key2, &n, DES_DECRYPT );
  
         return (Res);
- 
 }
 

@@ -3,11 +3,11 @@
 
 int main(int argc, char **argv)
 {
-	char *hello="hello world!";
-	char *cipher=Encrypt("keykeykey",hello,strlen(hello));
-	printf("%s\n",cipher);
-	char *plain=Decrypt("keykeykey",cipher,strlen(cipher));
-	printf("%s\n",plain);
+	char *hello="hello world hello hello hello hello!";
+	char *cipher=des_encrypt("keykeykey",hello,strlen(hello));
+	printf("Ciphertext: %s\n",cipher);
+	char *plain=des_decrypt("keykeykey",cipher,strlen(cipher));
+	printf("Plaintext: %s\n",plain);
 
 	return 0;
 
