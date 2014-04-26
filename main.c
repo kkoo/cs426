@@ -10,9 +10,10 @@ int main(int argc, char **argv)
 	printf("Plaintext: %s\n",plain);
 	char *sha=sha1_digest(cipher);
 	printf("Hash: %s\n",sha);
-	char *rsa=rsa_encrypt(sha,"ku_pub.pem");
+	char *rsa=rsa_encrypt(plain,"ku_pub.pem");
 	printf("RSA cipher: %s\n",rsa);
-
+	char *rsaplain=rsa_decrypt(rsa,"ku_priv.pem");
+	printf("RSA decrypt result: %s\n",rsaplain);
 	return 0;
 
 }

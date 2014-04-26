@@ -21,3 +21,20 @@ char* rsa_encrypt(char *msg, char *keyfile)
 	return ret;
 
 }
+char* rsa_decrypt(char *msg, char *keyfile)
+{
+	FILE *fp=fopen(keyfile,"rb");
+	RSA *rsa;
+	rsa=PEM_read_RSAPrivateKey(fp,NULL,NULL,NULL);
+	int rsa_len=RSA_size(rsa);
+	int len=strlen(msg);
+
+	char *ret=(char *)malloc(rsa_len+1);
+	memset(ret,0,rsa_len+1);
+
+	RSA_private_decrypt(rsa_len,msg,ret,rsa,RSA_NO_PADDING);
+
+	fclose(fp);
+	return ret;
+
+}
