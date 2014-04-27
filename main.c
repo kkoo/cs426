@@ -15,10 +15,11 @@ int main(int argc, char **argv)
 	printf("RSA cipher: %s\n",rsacipher);
 	char *rsaplain=rsa_decrypt(rsacipher,"ku_priv.pem");
 	printf("RSA decryption result: %s\n",rsaplain);
-	char *sig=rsa_sign(plain,"ku_priv.pem");
+	int len=0;
+	char *sig=rsa_sign(plain,"ku_priv.pem",&len);
 	printf("RSA signature: %s\n",sig);
-	int v=rsa_verify(plain,sig,"ku_pub.pem");
-	if(v==0) printf("Verified!\n"); else printf ("Verification failed!\n");
+	int v=rsa_verify(plain,sig,"ku_pub.pem",len);
+	if(v) printf("Verified!\n"); else printf ("Verification failed!\n");
 
 	return 0;
 
