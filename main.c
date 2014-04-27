@@ -1,6 +1,7 @@
 // This is a test for encryption/decryption functions
 #include <stdio.h>
 #include <string.h>
+#include "project.h"
 
 int main(int argc, char **argv)
 {
@@ -19,6 +20,13 @@ int main(int argc, char **argv)
 	printf("RSA signature: %s\n",sig);
 	int v=rsa_verify(plain,sig,"ku_pub.pem");
 	if(v==0) printf("Verified!\n"); else printf ("Verification failed!\n");
+
+	//create first message
+	char *msg = createMsg(0, ID_UNTRUSTED, PUB_KEY_U, PRIV_KEY_U, createFistKey(), createX0());
+	printf("Message: %s\n", msg);
+
+	//create first log entry
+	struct LogEntry *firstLog = createLogEntry(LOG_INIT, 1, msg);
 
 	return 0;
 
