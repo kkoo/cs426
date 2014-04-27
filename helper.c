@@ -21,7 +21,7 @@ unsigned char *intToStr(int num) {
 	sprintf(str, "%d", num);
 
 	char *returnStr = (char *)malloc(strlen(str) +1);
-    strcpy(returnStr,str);  
+    	strcpy(returnStr,str);  
 
 	return returnStr;
 }
