@@ -1,6 +1,7 @@
 // This is a test for encryption/decryption functions
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "project.h"
 
 int main(int argc, char **argv)

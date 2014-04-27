@@ -62,9 +62,9 @@ unsigned char *createX0() {
    	int length = ftell (fp);
    	rewind(fp);
 
-    buf = (char *) malloc (length + 1);
-    fread(buf,sizeof(char),length,fp);
-    buf[length+1] = '\0';
+	buf = (char *) malloc (length + 1);
+	fread(buf,sizeof(char),length,fp);
+	buf[length+1] = '\0';
 
 	close(fp);
 	//end read CERT
@@ -82,7 +82,7 @@ unsigned char *createX(int stepID, msg_type logType, char *x) {
 	//x = p, logID, hash(X_prev)
 	char *p = intToStr( stepID );
 	char *logID = intToStr( logType );
-	char hashVal = sha1_digest(x);
+	char *hashVal = sha1_digest(x);
 
 	char *retStr = (char *)malloc( strlen(p) + strlen(logID) + strlen(hashVal) + 1);
 	retStr = strcat(retStr, p);
