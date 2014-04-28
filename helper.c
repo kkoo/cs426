@@ -156,12 +156,8 @@ struct LogEntry *createLogEntry(int logID, struct Msg *msg) {
 }
 
 void printLog(struct LogEntry *entry) {
-	//char buf[1000];
-	//sprintf(buf, "%d %d %d %s", entry->timestamp, entry->timeout, entry->logID, entry->message);
-
-	//return buf;
-	//printf("Log:%d %d %d %s\n", entry->timestamp, entry->timeout, entry->logID, entry->message);
-	//printf("Log:%d %d %d\n", entry->timestamp, entry->timeout, entry->logID);
+	
+	printf("Log:%d %d %d %s\n", entry->timestamp, entry->timeout, entry->logID, entry->message);
 	return;
 }
 
