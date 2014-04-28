@@ -64,16 +64,17 @@ unsigned char *createX0() {
 
 	buf = (char *) malloc (length + 1);
 	fread(buf,sizeof(char),length,fp);
-	buf[length+1] = '\0';
+	buf[length] = '\0';
 
 	close(fp);
 	//end read CERT
 
 	char *retStr = (char *)malloc( strlen(p) + strlen(d) + strlen(buf) + strlen(authKey) + 1);
-	strcat(retStr, p);
+	strcpy(retStr, p);
 	strcat(retStr, d);
 	strcat(retStr, buf);
 	strcat(retStr, authKey);
+	strcat(retStr, "\0");
 
 	return retStr;
 }
@@ -85,46 +86,53 @@ unsigned char *createX(int stepID, msg_type logType, char *x) {
 	char *hashVal = sha1_digest(x);
 
 	char *retStr = (char *)malloc( strlen(p) + strlen(logID) + strlen(hashVal) + 1);
-	retStr = strcat(retStr, p);
+	retStr = strcpy(retStr, p);
 	retStr = strcat(retStr, logID);
 	retStr = strcat(retStr, hashVal);
 	
 	return retStr;
 }
 
-unsigned char *createMsg(int stepID, int senderID, 
+struct Msg *createMsg(int stepID, int senderID, 
 						char *pubEncFile, char *sigFile,
 						char *key, char *x) {
 
-	unsigned char *p = intToStr(stepID);
-	unsigned char *id = intToStr(senderID);
+	//unsigned char *p = intToStr(stepID);
+	//unsigned char *id = intToStr(senderID);
 	unsigned char *pke;			//public encryption
 	unsigned char *encrypt;		//sym encryption
 	unsigned char *sign;
 
 	//sign
-	sign = rsa_sign(x, sigFile);
+	int xLen = strlen(x);
+	int sigLen = 0;
+	sign = rsa_sign(x, sigFile, &sigLen);
+
 	//public encryption
 	pke = rsa_encrypt(key, pubEncFile);
 
-	char *tmp = (char *)malloc(strlen(x) + strlen(sign) + 1);
-	strcat(tmp, x);
+	char *tmp = (char *)malloc(xLen + sigLen + 1);
+	strcpy(tmp, x);
 	strcat(tmp, sign);
 
 	//sym enccryption
 	encrypt = des_encrypt( key, tmp, strlen(tmp));
 
+	struct Msg *msg = (struct Msg *)malloc( sizeof(struct Msg) );
+
 	//prepare the msg
-	char *retStr = (char *)malloc(strlen(p) + strlen(id) + strlen(pke) + strlen(encrypt) + 1);
-	strcpy(retStr, p);
-	strcat(retStr, id);
-	strcat(retStr, pke);
-	strcat(retStr, encrypt);
-	//strcat(retStr, "\0");
-	return retStr;
+	msg->p = stepID;
+	msg->id = senderID;
+	msg->xLen = xLen;
+	msg->sigLen = sigLen;
+	msg->pke = pke;
+	msg->enc = encrypt;
+	msg->encLen = strlen(tmp);
+
+	return msg;
 }
 
-struct LogEntry *createLogEntry(int logID, char *msg) {
+struct LogEntry *createLogEntry(int logID, struct Msg *msg) {
 	int d = getTimeStamp();
 	struct LogEntry *entry = (struct LogEntry *)malloc( sizeof(struct LogEntry) );
 	
@@ -144,4 +152,30 @@ void printLog(struct LogEntry *entry) {
 	//printf("Log:%d %d %d %s\n", entry->timestamp, entry->timeout, entry->logID, entry->message);
 	//printf("Log:%d %d %d\n", entry->timestamp, entry->timeout, entry->logID);
 	return;
+}
+
+int verifyMsg(struct Msg *msg, char *privKeyFile, char *pubKeyFile) {
+	//get key
+	char *encKey = msg->pke;
+	char *key = rsa_decrypt(encKey, privKeyFile);
+
+	//decrypt the message
+	char *enc = msg->enc;
+	char *text = des_decrypt( key, enc, msg->encLen);
+
+	//divide message into x and signiture
+	int xLen = msg->xLen;
+	int sigLen = msg->sigLen;
+	char x[xLen+1];
+	char sig[sigLen+1];
+	memcpy( x, text, xLen );
+	x[xLen] = '\0';
+	text = text+xLen;
+	
+	memcpy( sig, text, sigLen );
+	sig[sigLen] ='\0';
+
+	//verify signiture
+	int result = rsa_verify(x, sig, pubKeyFile, sigLen);
+	return result;
 }

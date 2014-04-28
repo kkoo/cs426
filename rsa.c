@@ -46,7 +46,8 @@ char *rsa_sign(char *msg, char *keyfile, int *len)
 	RSA *rsa;
 	FILE *fp=fopen(keyfile,"rb");
 	rsa=PEM_read_RSAPrivateKey(fp,NULL,NULL,NULL);
-	char *ret=(char *)calloc(RSA_size(rsa),sizeof(unsigned char));
+	char *ret=(char *)calloc(RSA_size(rsa)+1,sizeof(unsigned char));
+	memset(ret,0,RSA_size(rsa) +1); 					
 	char *digest=sha1_digest(msg);
 	RSA_sign(NID_sha1,(unsigned char *)msg,strlen(msg),(unsigned char *)ret,len,rsa);
 	fclose(fp);

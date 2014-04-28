@@ -14,5 +14,15 @@ struct LogEntry {
 	int timestamp;
 	int timeout;
 	int logID;
-	unsigned char* message;
+	struct Msg *message;
+};
+
+struct Msg {
+	int p;
+	int id;
+	int xLen;
+	int sigLen;
+	char *pke;
+	char *enc;
+	int encLen;
 };

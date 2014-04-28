@@ -23,16 +23,18 @@ int main(int argc, char **argv)
 	printf("RSA signature: %s\n",sig);
 	int v=rsa_verify(plain,sig,"ku_pub.pem",len);
 	if(v) printf("Verified!\n"); else printf ("Verification failed!\n");
-
+	*/
+	////////STARTUP from U////////////////
 	//create first message
-	char *msg = createMsg(0, ID_UNTRUSTED, PUB_KEY_U, PRIV_KEY_U, createFistKey(), createX0());
-	printf("Message: \n%s\n", msg);
-
+	//struct Msg *msg = createMsg(0, ID_UNTRUSTED, PUB_KEY_T, PRIV_KEY_U, createFistKey(), createX0());
+	struct Msg *msg = createMsg(0, ID_UNTRUSTED, PUB_KEY_T, PRIV_KEY_U, createFistKey(), "AAAAAAAAAAAAAAAA");
 	//create first log entry
 	struct LogEntry *firstLog = createLogEntry(LOG_INIT, 1, msg);
-	//printLog(firstLog);
-	return 0;
-	*/
-	shell();
+	
+	///////T//////////////
+	int result = verifyMsg(msg, PRIV_KEY_T, PUB_KEY_U);
 
+	printf("result: %d\n", result);
+	//shell();
+	return 0;
 }

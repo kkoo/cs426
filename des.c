@@ -42,7 +42,7 @@ des_decrypt( char *Key, char *Msg, int size)
         DES_key_schedule schedule;
  
         Res = ( char * ) malloc( size )+1;
-	memset(Res,0,size+1);
+	   memset(Res,0,size+1);
  
         /* Prepare the key for use with DES_cfb64_encrypt */
         DES_string_to_key(Key, &Key2);
