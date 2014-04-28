@@ -116,11 +116,11 @@ unsigned char *createMsg(int stepID, int senderID,
 
 	//prepare the msg
 	char *retStr = (char *)malloc(strlen(p) + strlen(id) + strlen(pke) + strlen(encrypt) + 1);
-	strcat(retStr, p);
+	strcpy(retStr, p);
 	strcat(retStr, id);
 	strcat(retStr, pke);
 	strcat(retStr, encrypt);
-	//strcat(retStr, '\0');
+	//strcat(retStr, "\0");
 	return retStr;
 }
 

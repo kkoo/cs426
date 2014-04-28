@@ -6,6 +6,7 @@
 
 int main(int argc, char **argv)
 {
+	/*
 	char *hello="hello world hello hello hello hello!";
 	char *cipher=des_encrypt("keykeykey",hello,strlen(hello));
 	printf("Ciphertext: %s\n",cipher);
@@ -25,11 +26,13 @@ int main(int argc, char **argv)
 
 	//create first message
 	char *msg = createMsg(0, ID_UNTRUSTED, PUB_KEY_U, PRIV_KEY_U, createFistKey(), createX0());
-	printf("Message: %s\n", msg);
+	printf("Message: \n%s\n", msg);
 
 	//create first log entry
 	struct LogEntry *firstLog = createLogEntry(LOG_INIT, 1, msg);
-
+	//printLog(firstLog);
 	return 0;
+	*/
+	shell();
 
 }
