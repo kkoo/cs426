@@ -7,31 +7,40 @@
 
 char *certFile = CERT_FILE;
 
-int getTimeStamp() {
+unsigned int getTimeStamp() {
     return (int)time(NULL);
 }
 
-int createRandomNum() {
+unsigned int createRandomNum() {
 	srand( (unsigned)time(NULL) );
 	return rand();
 }
 
 unsigned char *intToStr(int num) {
-	char str[16];
+	char str[16] = "";
 	sprintf(str, "%d", num);
 
 	char *returnStr = (char *)malloc(strlen(str) +1);
-    	strcpy(returnStr,str);  
+	memset(returnStr, 0, strlen(str) +1);
+    strcpy(returnStr, str);
 
 	return returnStr;
 }
 
-unsigned char *createFistKey() {
-	return sha1_digest( intToStr(getTimeStamp()+createRandomNum()) );
+unsigned char *hash(char *str) {
+	return sha1_digest(str);
+}
+
+unsigned char *createFirstKey() {
+	//return sha1_digest( intToStr(getTimeStamp()+createRandomNum()) );
+	return sha1_digest( intToStr(createRandomNum()) );
 }
 
 unsigned char *createKey(char *enc_key, msg_type logType, char *authKey) {
-	char *tmp = (char *)malloc(strlen(enc_key) + strlen(intToStr(logType)) +strlen(authKey) + 1);
+	int size = strlen(enc_key) + strlen(intToStr(logType)) +strlen(authKey) + 1;
+	char *tmp = (char *)malloc(size);
+	memset(tmp,0,size);
+	//TODO: create key
 	return sha1_digest(tmp);
 }
 
@@ -51,7 +60,7 @@ unsigned char *createX0() {
 
 	//read the certificate
 	unsigned char *Cu;
-	char *buf;
+	char *cert;
 
 	FILE *fp=fopen(certFile, "rb");
 	if (fp == NULL) {
@@ -62,33 +71,35 @@ unsigned char *createX0() {
    	int length = ftell (fp);
    	rewind(fp);
 
-	buf = (char *) malloc (length + 1);
-	fread(buf,sizeof(char),length,fp);
-	buf[length] = '\0';
+	cert = (char *) malloc (length + 1);
+	fread(cert,sizeof(char),length,fp);
+	cert[length] = '\0';
 
 	close(fp);
 	//end read CERT
 
-	char *retStr = (char *)malloc( strlen(p) + strlen(d) + strlen(buf) + strlen(authKey) + 1);
-	strcpy(retStr, p);
-	strcat(retStr, d);
-	strcat(retStr, buf);
-	strcat(retStr, authKey);
+	char *retStr = (char *)malloc( strlen(p) + strlen(d) + strlen(cert) + strlen(authKey) + 1);
+	strcpy(retStr, p); free(p);
+	strcat(retStr, d); free(d);
+	strcat(retStr, cert); free(cert);
+	strcat(retStr, authKey); free(authKey);
 	strcat(retStr, "\0");
 
 	return retStr;
 }
 
-unsigned char *createX(int stepID, msg_type logType, char *x) {
+unsigned char *createX(int stepID, int logId, char *x) {
 	//x = p, logID, hash(X_prev)
 	char *p = intToStr( stepID );
-	char *logID = intToStr( logType );
+	char *logID = intToStr( logId );
 	char *hashVal = sha1_digest(x);
 
+	//printf("createX p:%s log:%s hashval:%s\n", p, logID, hashVal);
+
 	char *retStr = (char *)malloc( strlen(p) + strlen(logID) + strlen(hashVal) + 1);
-	retStr = strcpy(retStr, p);
-	retStr = strcat(retStr, logID);
-	retStr = strcat(retStr, hashVal);
+	retStr = strcpy(retStr, p);	free(p);
+	retStr = strcat(retStr, logID); free(logID);
+	retStr = strcat(retStr, hashVal); free(hashVal);
 	
 	return retStr;
 }
@@ -112,8 +123,8 @@ struct Msg *createMsg(int stepID, int senderID,
 	pke = rsa_encrypt(key, pubEncFile);
 
 	char *tmp = (char *)malloc(xLen + sigLen + 1);
-	strcpy(tmp, x);
-	strcat(tmp, sign);
+	strcpy(tmp, x); //free(x);
+	strcat(tmp, sign); //free(sign);
 
 	//sym enccryption
 	encrypt = des_encrypt( key, tmp, strlen(tmp));
@@ -171,11 +182,33 @@ int verifyMsg(struct Msg *msg, char *privKeyFile, char *pubKeyFile) {
 	memcpy( x, text, xLen );
 	x[xLen] = '\0';
 	text = text+xLen;
-	
 	memcpy( sig, text, sigLen );
 	sig[sigLen] ='\0';
+
+	//printf("verfy: encLen:%d xLen:%d sigLen:%d\n", msg->encLen, xLen, sigLen);
+
+	//printf("x:%s\n", x);
+	//printf("sig:%s\n", sig);
 
 	//verify signiture
 	int result = rsa_verify(x, sig, pubKeyFile, sigLen);
 	return result;
+}
+
+char* getX(struct Msg *msg, char *privKeyFile, char *pubKeyFile) {
+	//get key
+	char *encKey = msg->pke;
+	char *key = rsa_decrypt(encKey, privKeyFile);
+
+	//decrypt the message
+	char *enc = msg->enc;
+	char *text = des_decrypt( key, enc, msg->encLen);
+
+	//divide message into x and signiture
+	int xLen = msg->xLen;
+	char *x = (char *)malloc(xLen +1);
+	memcpy( x, text, xLen );
+	x[xLen] = '\0';
+	
+	return x;
 }

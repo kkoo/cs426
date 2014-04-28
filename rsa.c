@@ -15,13 +15,20 @@ char* rsa_encrypt(char *msg, char *keyfile)
 	char *ret=(char *)malloc(rsa_len+1);
 	memset(ret,0,rsa_len+1);
 
-	RSA_public_encrypt(rsa_len,msg,ret,rsa,RSA_NO_PADDING);
+	int result = RSA_public_encrypt(rsa_len,msg,ret,rsa,RSA_NO_PADDING);
+	//int result = RSA_public_encrypt(rsa_len,msg,ret,rsa,RSA_PKCS1_PADDING);
+	if(result < 0 ){
+		ERR_load_crypto_strings();  
+		char buff[1000] ="";
+		ERR_error_string(ERR_get_error(), buff);
+		printf("ERROR: %s\n", buff);
+	}
 
 	fclose(fp);
 	RSA_free(rsa);
 	return ret;
-
 }
+
 char* rsa_decrypt(char *msg, char *keyfile)
 {
 	FILE *fp=fopen(keyfile,"rb");
