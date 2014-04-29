@@ -10,6 +10,14 @@
 typedef enum {LOG_INIT, RESP_MSG, ABNORMAL_CLOSE, NORMAL_CLOSE} msg_type;
 typedef enum {ID_UNTRUSTED, ID_TRUSTED, ID_VERIFY} machine_id;
 
+
+struct ALogEntry {
+	int logType;		//type
+	char *data;			//encrypted Data
+	char *hashChain;	//hash chain
+	char *msgAuth;		//MAC
+};
+
 struct LogEntry {
 	int timestamp;
 	int timeout;
