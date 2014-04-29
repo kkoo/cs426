@@ -63,12 +63,26 @@ int main(int argc, char **argv)
 	int v=rsa_verify(plain,sig,"ku_pub.pem",len);
 	if(v) printf("Verified!\n"); else printf ("Verification failed!\n");
 	*/
-
+	/*
 	createLog("1.log");
 	struct LogEntry *l=readEntry("1.log");
 	printf("%d %d %d %d %d %d %d %d\n",l->timestamp,l->timeout,l->logID,l->message->p,l->message->id,
 			l->message->xLen,l->message->sigLen,l->message->encLen);
 	printf("%s\n\n\n%s\n\n\n",l->message->pke,l->message->enc,l->message->encLen);
+	printf("%d\n",verifyMsg(l->message, PRIV_KEY_T, PUB_KEY_U));
+	*/
+	struct ALogEntry e;
+	e.logType=0;
+	e.data="Hello!";
+	e.hashChain="asdjkasdhjaskdhkjasdhjaskdhkjsadhkjhsadjasd";
+	e.msgAuth="DHASDASJDHJKASDHKJASDHJK";
+
+	writeAEntry(&e,"1.log");
+	char fn[10];
+	strcpy(fn,"1.log");
+	struct ALogEntry *r=readAEntry(fn);
+	printf("%d %s %s %s\n",r->logType,r->data,r->hashChain,r->msgAuth);
+
 
 	//shell();
 	return 0;

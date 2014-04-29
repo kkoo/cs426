@@ -5,7 +5,8 @@
 
 void writeEntry(struct LogEntry *e, char* fn)
 {
-	FILE *pf=fopen(fn,"wb");
+	FILE *pf=fopen(fn,"a");
+	if (pf==NULL) pf=fopen(fn,"wb");
 
 	fprintf(pf,"%d %d %d ",e->timestamp,e->timeout,e->logID);
 	fprintf(pf,"%d %d %d %d %d\n",e->message->p,e->message->id,e->message->xLen,e->message->sigLen,e->message->encLen);
