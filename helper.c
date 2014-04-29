@@ -33,7 +33,7 @@ unsigned char *hash(char *str) {
 
 unsigned char *createFirstKey() {
 	//return sha1_digest( intToStr(getTimeStamp()+createRandomNum()) );
-	return sha1_digest( intToStr(createRandomNum()) );
+	return ( intToStr(createRandomNum()) );
 }
 
 unsigned char *createKey(char *enc_key, msg_type logType, char *authKey) {
@@ -45,11 +45,11 @@ unsigned char *createKey(char *enc_key, msg_type logType, char *authKey) {
 }
 
 unsigned char *createFirstAuthKey() {
-	return sha1_digest( intToStr(createRandomNum()) );
+	return ( intToStr(createRandomNum()) );
 }
 
 unsigned char *createAuthKey(char *key) {
-	return sha1_digest( *key );
+	return ( *key );
 }
 
 unsigned char *createX0() {
@@ -92,7 +92,7 @@ unsigned char *createX(int stepID, int logId, char *x) {
 	//x = p, logID, hash(X_prev)
 	char *p = intToStr( stepID );
 	char *logID = intToStr( logId );
-	char *hashVal = sha1_digest(x);
+	char *hashVal = (x);
 
 	//printf("createX p:%s log:%s hashval:%s\n", p, logID, hashVal);
 

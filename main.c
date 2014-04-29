@@ -11,7 +11,7 @@ int createLog() {
 	////////STARTUP from U////////////////
 	//create first message
 	//struct Msg *msg = createMsg(0, ID_UNTRUSTED, PUB_KEY_T, PRIV_KEY_U, createFistKey(), createX0());
-	char *x = "AAAAAAAAAAAAAAAA";
+	char *x = "ZZZ";
 	char *hashX = hash(x);
 	struct Msg *msg = createMsg(stepNum, ID_UNTRUSTED, PUB_KEY_T, PRIV_KEY_U, createFirstKey(), x);
 	//create first log entry
@@ -30,7 +30,7 @@ int createLog() {
 
 	//create X1
 	//char *x1 = createX(p, logID, x0); //what to do with logID?
-	char *x1 = "AAAAAAAAAAAAAAAA";
+	char *x1 = "ZZZ";
 
 	//create msg
 	struct Msg *msg1 = createMsg(p, ID_TRUSTED, PUB_KEY_U, PRIV_KEY_T, createFirstKey(), x1);
@@ -38,7 +38,6 @@ int createLog() {
 	////////----U///////////////////
 	result = verifyMsg(msg1, PRIV_KEY_U, PUB_KEY_T);
 	printf("Result from U:%d\n", result);
-
 	struct LogEntry *secondLog = createLogEntry(RESP_MSG, logID, msg);
 	printLog(firstLog);
 }
