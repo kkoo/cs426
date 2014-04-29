@@ -78,9 +78,7 @@ int main(int argc, char **argv)
 	e.msgAuth="DHASDASJDHJKASDHKJASDHJK";
 
 	writeAEntry(&e,"1.log");
-	char fn[10];
-	strcpy(fn,"1.log");
-	struct ALogEntry *r=readAEntry(fn);
+	struct ALogEntry *r=readAEntry("1.log");
 	printf("%d %s %s %s\n",r->logType,r->data,r->hashChain,r->msgAuth);
 
 

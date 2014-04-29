@@ -15,7 +15,7 @@ void writeAEntry(struct ALogEntry *e, char* fn)
 
 }
 
-struct ALogEntry readAEntry(char* fn)
+struct ALogEntry *readAEntry(char* fn)
 {
 	FILE *pf=fopen(fn,"rb");
 	if(pf==NULL) {
@@ -73,5 +73,9 @@ struct ALogEntry readAEntry(char* fn)
 		}
 		index++;
 	} //while
+	e->data=data;
+	e->hashChain=hc;
+	e->msgAuth=ma;
+	return e;
 	fclose(pf);
 }
