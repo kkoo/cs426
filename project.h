@@ -7,7 +7,7 @@
 
 
 
-typedef enum {LOG_INIT, RESP_MSG, ABNORMAL_CLOSE, NORMAL_CLOSE} msg_type;
+typedef enum {LOG_INIT, RESP_MSG, ABNORMAL_CLOSE, NORMAL_CLOSE, NORMAL_MSG} msg_type;
 typedef enum {ID_UNTRUSTED, ID_TRUSTED, ID_VERIFY} machine_id;
 
 

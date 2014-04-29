@@ -37,7 +37,7 @@ unsigned char *createFirstKey() {
 }
 
 unsigned char *createKey(char *enc_key, msg_type logType, char *authKey) {
-	int size = strlen(enc_key) + strlen(intToStr(logType)) +strlen(authKey) + 1;
+	int size = strlen(enc_key) + strlen(intToStr(logType)) + strlen(authKey) + 1;
 	char *tmp = (char *)malloc(size);
 	memset(tmp,0,size);
 	//TODO: create key
@@ -52,11 +52,10 @@ unsigned char *createAuthKey(char *key) {
 	return ( *key );
 }
 
-unsigned char *createX0() {
+unsigned char *createX0(char *authKey) {
 	//x0 = p, d, Cu, A0
 	char *p = intToStr( 1 );
 	char *d = intToStr( getTimeStamp() );
-	char *authKey = intToStr(createRandomNum());  //WHAT TO DO WITH RANDOM STARTING POINT?
 
 	//read the certificate
 	unsigned char *Cu;
@@ -82,7 +81,7 @@ unsigned char *createX0() {
 	strcpy(retStr, p); free(p);
 	strcat(retStr, d); free(d);
 	strcat(retStr, cert); free(cert);
-	strcat(retStr, authKey); free(authKey);
+	strcat(retStr, authKey); 
 	strcat(retStr, "\0");
 
 	return retStr;
@@ -143,6 +142,10 @@ struct Msg *createMsg(int stepID, int senderID,
 	return msg;
 }
 
+char *encryptData(char *data, char *key, int len) {
+	return des_encrypt(key, data, len);
+}
+
 struct LogEntry *createLogEntry(int type,int logID, struct Msg *msg) {
 	int d = getTimeStamp();
 	struct LogEntry *entry = (struct LogEntry *)malloc( sizeof(struct LogEntry) );
@@ -155,9 +158,31 @@ struct LogEntry *createLogEntry(int type,int logID, struct Msg *msg) {
 	return entry;
 }
 
+struct ALogEntry *createALogEntry(int logType, char *data, char *hash, char *msgAuth) {
+
+	struct ALogEntry *entry = (struct ALogEntry *)malloc( sizeof(struct ALogEntry) );
+	entry->logType = logType;
+	entry->data = data;
+	entry->hashChain = hash;
+	entry->msgAuth = msgAuth;
+
+	return entry;
+}
+
+char *logToStr(struct LogEntry *entry) {
+	char *retStr = (char *)malloc( strlen(intToStr(entry->timestamp)) + strlen(intToStr(entry->timeout)) + strlen(intToStr(entry->logID)) + strlen(entry->message) + 10);
+	sprintf(retStr, "%d %d %d %s\n", entry->timestamp, entry->timeout, entry->logID, entry->message);
+	return retStr;
+}
+
 void printLog(struct LogEntry *entry) {
-	
+
 	printf("Log:%d %d %d %s\n", entry->timestamp, entry->timeout, entry->logID, entry->message);
+	return;
+}
+
+void printALog(struct ALogEntry *entry) {
+	printf("Log:%d %s %s %s\n", entry->logType, entry->data, entry->hashChain, entry->msgAuth);
 	return;
 }
 
@@ -181,11 +206,6 @@ int verifyMsg(struct Msg *msg, char *privKeyFile, char *pubKeyFile) {
 	memcpy( sig, text, sigLen );
 	sig[sigLen] ='\0';
 
-	//printf("verfy: encLen:%d xLen:%d sigLen:%d\n", msg->encLen, xLen, sigLen);
-
-	//printf("x:%s\n", x);
-	//printf("sig:%s\n", sig);
-
 	//verify signiture
 	int result = rsa_verify(x, sig, pubKeyFile, sigLen);
 	return result;
@@ -208,3 +228,31 @@ char* getX(struct Msg *msg, char *privKeyFile, char *pubKeyFile) {
 	
 	return x;
 }
+
+char *getKey(struct Msg *msg, char *privKeyFile, char *pubKeyFile) {
+	//get key
+	char *encKey = msg->pke;
+	char *key = rsa_decrypt(encKey, privKeyFile);
+
+	return key;
+}
+
+char *createY(char *prevHash, char *encData, int logType) {
+	char *logTypeStr = intToStr(logType);
+	int prevHashLen = strlen(prevHash);
+	int encDataLen = strlen(encData);
+	int logTypeLen = strlen(logTypeStr);
+
+	char *returnStr = (char *)malloc(prevHashLen+encDataLen+logTypeLen+1);
+	strcpy(returnStr, prevHash); 
+	strcpy(returnStr, encData);	
+	strcpy(returnStr, logTypeStr); free(logTypeStr);
+
+	return returnStr;
+}
+
+char *genMAC(char *key, char *data) {
+	return hmac(key, data);
+}
+
+
