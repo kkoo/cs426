@@ -143,7 +143,7 @@ struct Msg *createMsg(int stepID, int senderID,
 	return msg;
 }
 
-struct LogEntry *createLogEntry(int logID, struct Msg *msg) {
+struct LogEntry *createLogEntry(int type,int logID, struct Msg *msg) {
 	int d = getTimeStamp();
 	struct LogEntry *entry = (struct LogEntry *)malloc( sizeof(struct LogEntry) );
 	
