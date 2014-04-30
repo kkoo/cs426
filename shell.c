@@ -27,7 +27,7 @@ void shell()
 			char outputFile[128];
 			sscanf(cmd,"%s %s %s",operation,str,outputFile);
 			// TODO: call verify all
-			testLog(currentFile);
+			testLog(currentFile, -1);
 
 			continue;
 		}
@@ -36,6 +36,12 @@ void shell()
 			int entryNo;
 			sscanf(str,"%d",&entryNo);
 			// TODO: call verify entry function
+			if(entryNo >= 1) {
+				testLog(currentFile, entryNo);
+			}
+			else {
+				//error
+			}
 
 			continue;
 		}

@@ -4,8 +4,10 @@
 #include <stdlib.h>
 #include "project.h"
 
-int logID = 0;
-int stepNum = 0;
+const int ENTRYNO_OFFSET = 1;
+
+int logID;
+int stepNum;
 
 char *currentFile;
 char *A0;
@@ -14,6 +16,8 @@ char *_hashChain;
 char *_sessionKey;
 
 int createLog(char *fn) {	
+	logID = createRandomNum();
+	stepNum = 0;
 	////////////////STARTUP from U////////////////
 	//create first message
 	
@@ -113,7 +117,9 @@ int closeLog(char *fn) {
 	writeAEntry(finalLog, fn);
 }
 
-void testLog(char *fn) {
+//verifies log entry
+//verifies all log entry if entryNo = -1
+void testLog(char *fn, int entryNo) {
 	int logType;
 	char *data;
 	char *prevHashChain;
@@ -127,16 +133,39 @@ void testLog(char *fn) {
 	int fileOpen = 1;
 	int logValid = 1;
 	int normalClose = 0;
+
 	while(fileOpen) {
+		//break if not "verifyall" entryNO has been reached
+		if(entryNo != -1 && i-ENTRYNO_OFFSET > entryNo) {
+			normalClose = 1;
+			break;
+		}
+
 		struct ALogEntry *entry = readAEntry(fn, i);
 		if(entry == NULL) {
 			logValid = 0;
 			break;
 		}
-		if(entry->logType == LOG_INIT && i != 0) {
+		//check if log has been initialized
+		if(i == 0 && entry->logType != LOG_INIT) {
 			logValid = 0;
-		} 
+			break;
+		}
+		else if(i == 1 && entry->logType != RESP_MSG) {
+			logValid = 0;
+			break;
+		}
+
 		if(entry->logType == NORMAL_CLOSE) {
+			//NORMAL close before the entryNo
+			if(entryNo != -1) {
+				//entryNo does not exist
+				if(i-ENTRYNO_OFFSET <= entryNo) {
+					logValid = 0;
+					break;
+				}
+			}
+
 			normalClose = 1;
 			break;
 		}
@@ -163,15 +192,15 @@ void testLog(char *fn) {
 		
 		i++;
 	}
-	if(logValid == 1 && normalClose ==1) {
-		decryptLog(fn);
+	if(logValid == 1 && normalClose == 1) {
+		decryptLog(fn, entryNo);
 	}
 	else {
 		printf("Failed verification\n");
 	}
 }
 
-void decryptLog(char *fn) {
+void decryptLog(char *fn, int entryNo) {
 	int logType;
 	char *data;
 	char *prevHashChain;
@@ -186,6 +215,10 @@ void decryptLog(char *fn) {
 	int logValid = 1;
 	int normalClose = 0;
 	while(fileOpen) {
+		if(entryNo != -1 && i-ENTRYNO_OFFSET > entryNo){
+			break;
+		}
+
 		struct ALogEntry *entry = readAEntry(fn, i);
 		if(entry == NULL) {
 			break;
@@ -194,13 +227,18 @@ void decryptLog(char *fn) {
 			break;
 		}
 
+
 		if(entry->logType == NORMAL_MSG) {
 			//char *decKey = _sessionKey;
 			char *decKey = createKey(NORMAL_MSG, authKey);
 			char *text = des_decrypt(decKey, entry->data, strlen(entry->data));
 			if(text != NULL) {
-				//printf("MSG No%d: %s\n", i, text);
-				printf("%s\n", text);
+				if(entryNo == -1) {
+					printf("%s\n", text);
+				}
+				else if(i-ENTRYNO_OFFSET == entryNo) {
+					printf("%s\n", text);
+				}
 			}
 		}
 
@@ -222,7 +260,7 @@ int test(char *fn) {
 	addEntry(fn, "abcdef");
 	addEntry(fn, "abcdef2");
 	closeLog(fn);
-	testLog(fn);
+	testLog(fn, -1);
 }
 
 int main(int argc, char **argv)
@@ -272,7 +310,7 @@ int main(int argc, char **argv)
 
 	char *fn = "1.log";
 	test(fn);
-	
+
 	//currentFile=NULL;
 	//shell();
 	
