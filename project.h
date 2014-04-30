@@ -10,7 +10,7 @@
 typedef enum {LOG_INIT, RESP_MSG, ABNORMAL_CLOSE, NORMAL_CLOSE, NORMAL_MSG} msg_type;
 typedef enum {ID_UNTRUSTED, ID_TRUSTED, ID_VERIFY} machine_id;
 
-
+extern char *currentFile;
 struct ALogEntry {
 	int logType;		//type
 	char *data;			//encrypted Data

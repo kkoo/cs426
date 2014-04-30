@@ -7,6 +7,7 @@
 int logID = 0;
 int stepNum = 0;
 
+char *currentFile;
 char *A0;
 char *_logAuthKey;
 char *_hashChain;
@@ -17,7 +18,7 @@ int createLog(char *fn) {
 	//create first message
 	
 	//INIT values
-	char *x = "ZZZ";
+	char *x = "aaaaaaaaaaaaa";
 	char *hashX = hash(x);
 	
 	_hashChain = (char *)malloc(20+1); // the initial hash chain
@@ -114,7 +115,6 @@ void testLog(char *fn) {
 	addEntry(fn, "hello");
 	addEntry(fn, "abcdef");
 	closeLog(fn);
-
 	int logType;
 	char *data;
 	char *prevHashChain;
@@ -143,11 +143,11 @@ void testLog(char *fn) {
 		int result = strcmp(entry->msgAuth,msgAuthCmp);
 
 		if(result != 0) {
-			printf("Invalid Log entry:%d\n", i);
+			//printf("Invalid Log entry:%d\n", i);
 			logValid = 0;
 		}
 		else {
-			printf("Valid Log entry:%d\n", i);
+			//printf("Valid Log entry:%d\n", i);
 			logValid = 1;
 		}
 
@@ -162,10 +162,10 @@ void testLog(char *fn) {
 		i++;
 	}
 	if(logValid == 1) {
-		printf("Log is valid\n");
+		//printf("Log is valid\n");
 	}
 	else {
-		printf("Log is invalid\n");
+		printf("Failed verification\n");
 	}
 }
 
@@ -198,7 +198,7 @@ int main(int argc, char **argv)
 	printf("%d\n",verifyMsg(l->message, PRIV_KEY_T, PUB_KEY_U));
 	*/
 	//createLog("1.log");
-	testLog("test.log");
+	//testLog("test.log");
 	//struct ALogEntry *r=readAEntry("1.log",0);
 	//printf("%d %s %s %s\n",r->logType,r->data,r->hashChain,r->msgAuth);
 	//printf("%d %s %s %s\n",r->logType,r->data,r->hashChain,r->msgAuth);
@@ -213,7 +213,7 @@ int main(int argc, char **argv)
 	struct ALogEntry *r=readAEntry("1.log",1);
 	printf("%d %s %s %s\n",r->logType,r->data,r->hashChain,r->msgAuth);
 	*/
-
-	//shell();
+	currentFile=NULL;
+	shell();
 	return 0;
 }
