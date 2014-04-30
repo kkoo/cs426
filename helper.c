@@ -36,11 +36,13 @@ unsigned char *createFirstKey() {
 	return ( intToStr(createRandomNum()) );
 }
 
-unsigned char *createKey(char *enc_key, msg_type logType, char *authKey) {
-	int size = strlen(enc_key) + strlen(intToStr(logType)) + strlen(authKey) + 1;
+unsigned char *createKey(msg_type logType, char *authKey) {
+	int size = strlen(intToStr(logType)) + strlen(authKey) + 1;
 	char *tmp = (char *)malloc(size);
 	memset(tmp,0,size);
-	//TODO: create key
+	strcpy(tmp, intToStr(logType));
+	strcat(tmp, authKey);
+
 	return sha1_digest(tmp);
 }
 

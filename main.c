@@ -50,7 +50,7 @@ int createLog(char *fn) {
 
 	//verify the message
 	int result = verifyMsg(msg, PRIV_KEY_T, PUB_KEY_U);
-	printf("Result from T:%d\n", result);
+	//printf("Result from T:%d\n", result);
 	//TODO: check valid certificate
 
 	//increment protocol step ID;
@@ -72,15 +72,17 @@ int createLog(char *fn) {
 	/////////////FINALIZE INIT U///////////////////
 	//verify the msg
 	result = verifyMsg(msg1, PRIV_KEY_U, PUB_KEY_T);
-	printf("Result from U:%d\n", result);
+	//printf("Result from U:%d\n", result);
 
 	//get the data
-	//TODO: sessionKey = 
 	data = logToStr(createLogEntry(RESP_MSG, logID, msg1));
-	encData = encryptData(data, _sessionKey, strlen(data));
 
 	//update hash chains and keys
 	_logAuthKey = hash(_logAuthKey);						//A+1 = H(A)			//TODO: free prev
+	_sessionKey = createKey(NORMAL_MSG, _logAuthKey);		//K
+	encData = encryptData(data, _sessionKey, strlen(data));
+
+	//MSG Authentication
 	_hashChain = createY(_hashChain, encData, RESP_MSG);	//Y+1 = H(y, encData, logtype)
 	msgAuthCode = genMAC(_logAuthKey, _hashChain);		//Z = MAC(Y)
 	struct ALogEntry *secondLog = createALogEntry(RESP_MSG, encData, _hashChain, msgAuthCode);
@@ -93,10 +95,11 @@ int addEntry(char *fileName, char *msg) {
 	char *encData;
 	char *msgAuthCode;
 
-	//TODO: _sessionKey = 
+	_logAuthKey = hash(_logAuthKey);						//A+1 = H(A)			//TODO: free prev
+	_sessionKey = createKey(NORMAL_MSG, _logAuthKey);		//K
 	encData = encryptData(msg, _sessionKey, strlen(msg));
 
-	_logAuthKey = hash(_logAuthKey);						//A+1 = H(A)			//TODO: free prev
+	//MSG Authentication
 	_hashChain = createY(_hashChain, encData, logType);		//Y+1 = H(y, encData, logtype)
 	msgAuthCode = genMAC(_logAuthKey, _hashChain);			//Z = MAC(Y)
 
@@ -111,10 +114,6 @@ int closeLog(char *fn) {
 }
 
 void testLog(char *fn) {
-	createLog(fn);
-	addEntry(fn, "hello");
-	addEntry(fn, "abcdef");
-	closeLog(fn);
 	int logType;
 	char *data;
 	char *prevHashChain;
@@ -127,14 +126,18 @@ void testLog(char *fn) {
 	int i = 0;
 	int fileOpen = 1;
 	int logValid = 1;
+	int normalClose = 0;
 	while(fileOpen) {
 		struct ALogEntry *entry = readAEntry(fn, i);
-
+		if(entry == NULL) {
+			logValid = 0;
+			break;
+		}
 		if(entry->logType == LOG_INIT && i != 0) {
 			logValid = 0;
 		} 
 		if(entry->logType == NORMAL_CLOSE) {
-			printf("Log normal close recieved:%d\n", i);
+			normalClose = 1;
 			break;
 		}
 
@@ -143,12 +146,11 @@ void testLog(char *fn) {
 		int result = strcmp(entry->msgAuth,msgAuthCmp);
 
 		if(result != 0) {
-			//printf("Invalid Log entry:%d\n", i);
-			logValid = 0;
+			logValid = 0; //printf("Invalid Log entry:%d\n", i);
+			break;
 		}
 		else {
-			//printf("Valid Log entry:%d\n", i);
-			logValid = 1;
+			logValid = 1; //printf("Valid Log entry:%d\n", i);
 		}
 
 		logType = entry->logType;
@@ -161,12 +163,66 @@ void testLog(char *fn) {
 		
 		i++;
 	}
-	if(logValid == 1) {
-		//printf("Log is valid\n");
+	if(logValid == 1 && normalClose ==1) {
+		decryptLog(fn);
 	}
 	else {
 		printf("Failed verification\n");
 	}
+}
+
+void decryptLog(char *fn) {
+	int logType;
+	char *data;
+	char *prevHashChain;
+	char *msgAuth;
+	char *authKey = A0;
+
+	prevHashChain = (char *)malloc(20+1); // the initial hash chain
+	memset(prevHashChain, 'a', 20+1); 
+
+	int i = 0;
+	int fileOpen = 1;
+	int logValid = 1;
+	int normalClose = 0;
+	while(fileOpen) {
+		struct ALogEntry *entry = readAEntry(fn, i);
+		if(entry == NULL) {
+			break;
+		}
+		if(entry->logType == NORMAL_CLOSE) {
+			break;
+		}
+
+		if(entry->logType == NORMAL_MSG) {
+			//char *decKey = _sessionKey;
+			char *decKey = createKey(NORMAL_MSG, authKey);
+			char *text = des_decrypt(decKey, entry->data, strlen(entry->data));
+			if(text != NULL) {
+				//printf("MSG No%d: %s\n", i, text);
+				printf("%s\n", text);
+			}
+		}
+
+		logType = entry->logType;
+		data = entry->data;
+		prevHashChain = entry->hashChain;
+		msgAuth = entry->msgAuth;
+
+		//next authKey
+		authKey = hash(authKey);
+		
+		i++;
+	}
+}
+
+int test(char *fn) {
+	createLog(fn);
+	addEntry(fn, "hello");
+	addEntry(fn, "abcdef");
+	addEntry(fn, "abcdef2");
+	closeLog(fn);
+	testLog(fn);
 }
 
 int main(int argc, char **argv)
@@ -213,7 +269,12 @@ int main(int argc, char **argv)
 	struct ALogEntry *r=readAEntry("1.log",1);
 	printf("%d %s %s %s\n",r->logType,r->data,r->hashChain,r->msgAuth);
 	*/
-	currentFile=NULL;
-	shell();
+
+	char *fn = "1.log";
+	test(fn);
+	
+	//currentFile=NULL;
+	//shell();
+	
 	return 0;
 }
