@@ -193,14 +193,14 @@ void testLog(char *fn, int entryNo, FILE *fd) {
 		i++;
 	}
 	if(logValid == 1 && normalClose == 1) {
-		decryptLog(fn, entryNo);
+		decryptLog(fn, entryNo,fd);
 	}
 	else {
 		printf("Failed verification\n");
 	}
 }
 
-void decryptLog(char *fn, int entryNo) {
+void decryptLog(char *fn, int entryNo, FILE *fd) {
 	int logType;
 	char *data;
 	char *prevHashChain;
@@ -234,10 +234,10 @@ void decryptLog(char *fn, int entryNo) {
 			char *text = des_decrypt(decKey, entry->data, strlen(entry->data));
 			if(text != NULL) {
 				if(entryNo == -1) {
-					printf("%s\n", text);
+					fprintf(fd,"%s\n", text);
 				}
 				else if(i-ENTRYNO_OFFSET == entryNo) {
-					printf("%s\n", text);
+					fprintf(fd,"%s\n", text);
 				}
 			}
 		}
