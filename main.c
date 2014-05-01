@@ -84,7 +84,7 @@ int createLog(char *fn) {
 	data = logToStr(createLogEntry(RESP_MSG, logID, msg1));
 
 	//update hash chains and keys
-	_logAuthKey = hash(_logAuthKey);						//A+1 = H(A)			//TODO: free prev
+	_logAuthKey = hash(_logAuthKey);						//A+1 = H(A)			
 	_sessionKey = createKey(NORMAL_MSG, _logAuthKey);		//K
 	encData = encryptData(data, _sessionKey, strlen(data));
 
@@ -101,7 +101,7 @@ int addEntry(char *fileName, char *msg) {
 	char *encData;
 	char *msgAuthCode;
 
-	_logAuthKey = hash(_logAuthKey);						//A+1 = H(A)			//TODO: free prev
+	_logAuthKey = hash(_logAuthKey);						//A+1 = H(A)			
 	_sessionKey = createKey(NORMAL_MSG, _logAuthKey);		//K
 	encData = encryptData(msg, _sessionKey, strlen(msg));
 
@@ -115,7 +115,19 @@ int addEntry(char *fileName, char *msg) {
 }
 
 int closeLog(char *fn) {
-	struct ALogEntry *finalLog = createALogEntry(NORMAL_CLOSE, intToStr(getTimeStamp()), "", "");
+	char *encData;
+	char *msgAuthCode;
+	char *msg = intToStr(getTimeStamp());
+
+	_logAuthKey = hash(_logAuthKey);						//A+1 = H(A)
+	_sessionKey = createKey(NORMAL_CLOSE, _logAuthKey);		//K
+	encData = encryptData(msg, _sessionKey, strlen(msg));
+
+	//MSG Authentication
+	_hashChain = createY(_hashChain, encData, NORMAL_CLOSE);		//Y+1 = H(y, encData, logtype)
+	msgAuthCode = genMAC(_logAuthKey, _hashChain);					//Z = MAC(Y)
+
+	struct ALogEntry *finalLog = createALogEntry(NORMAL_CLOSE, encData, _hashChain, msgAuthCode);
 	writeAEntry(finalLog, fn);
 	currentFile=NULL;
 }
@@ -226,11 +238,14 @@ void decryptLog(char *fn, int entryNo, FILE *fd) {
 		if(entry == NULL) {
 			break;
 		}
-		if(entry->logType == NORMAL_CLOSE) {
-			break;
-		}
 
-		if(entry->logType == NORMAL_MSG || entry->logType == LOG_INIT) {
+		if(entry->logType == NORMAL_MSG || entry->logType == LOG_INIT || entry->logType == NORMAL_CLOSE) {
+			if(entry->logType == LOG_INIT) {
+				fprintf(fd, "%s", "LOG_INIT:");
+			}
+			else if(entry->logType == NORMAL_CLOSE) {
+				fprintf(fd, "%s", "NORMAL_CLOSE:");
+			}
 			//char *decKey = _sessionKey;
 			char *decKey = createKey(entry->logType, authKey);
 			char *text = des_decrypt(decKey, entry->data, strlen(entry->data));
@@ -242,6 +257,9 @@ void decryptLog(char *fn, int entryNo, FILE *fd) {
 					fprintf(fd, "%s\n", text);
 				}
 			}
+		}
+		if(entry->logType == NORMAL_CLOSE) {
+			break;
 		}
 
 		logType = entry->logType;
@@ -267,51 +285,6 @@ int test(char *fn) {
 
 int main(int argc, char **argv)
 {
-	/*
-	char *hello="hello world hello hello hello hello!";
-	char *cipher=des_encrypt("keykeykey",hello,strlen(hello));
-	printf("Ciphertext: %s\n",cipher);
-	char *plain=des_decrypt("keykeykey",cipher,strlen(cipher));
-	printf("Plaintext: %s\n",plain);
-	char *sha=sha1_digest(hello);
-	printf("Hash: %s\n",sha);
-	char *rsacipher=rsa_encrypt(plain,"ku_pub.pem");
-	printf("RSA cipher: %s\n",rsacipher);
-	char *rsaplain=rsa_decrypt(rsacipher,"ku_priv.pem");
-	printf("RSA decryption result: %s\n",rsaplain);
-	int len=0;
-	char *sig=rsa_sign(plain,"ku_priv.pem",&len);
-	printf("RSA signature: %s\n",sig);
-	int v=rsa_verify(plain,sig,"ku_pub.pem",len);
-	if(v) printf("Verified!\n"); else printf ("Verification failed!\n");
-	*/
-	/*
-	createLog("1.log");
-	struct LogEntry *l=readEntry("1.log");
-	printf("%d %d %d %d %d %d %d %d\n",l->timestamp,l->timeout,l->logID,l->message->p,l->message->id,
-			l->message->xLen,l->message->sigLen,l->message->encLen);
-	printf("%s\n\n\n%s\n\n\n",l->message->pke,l->message->enc,l->message->encLen);
-	printf("%d\n",verifyMsg(l->message, PRIV_KEY_T, PUB_KEY_U));
-	*/
-	//createLog("1.log");
-	//testLog("test.log");
-	//struct ALogEntry *r=readAEntry("1.log",0);
-	//printf("%d %s %s %s\n",r->logType,r->data,r->hashChain,r->msgAuth);
-	//printf("%d %s %s %s\n",r->logType,r->data,r->hashChain,r->msgAuth);
-	/*
-	struct ALogEntry e;
-	e.logType=0;
-	e.data="Hello!";
-	e.hashChain="asdjkasdhjaskdhkjasdhjaskdhkjsadhkjhsadjasd";
-	e.msgAuth="DHASDASJDHJKASDHKJASDHJK";
-
-	writeAEntry(&e,"1.log");
-	struct ALogEntry *r=readAEntry("1.log",1);
-	printf("%d %s %s %s\n",r->logType,r->data,r->hashChain,r->msgAuth);
-	*/
-
-	//char *fn = "1.log";
-	//test(fn);
 
 	currentFile=NULL;
 	shell();
