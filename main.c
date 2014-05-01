@@ -115,6 +115,7 @@ int addEntry(char *fileName, char *msg) {
 int closeLog(char *fn) {
 	struct ALogEntry *finalLog = createALogEntry(NORMAL_CLOSE, intToStr(getTimeStamp()), "", "");
 	writeAEntry(finalLog, fn);
+	currentFile=NULL;
 }
 
 //verifies log entry
