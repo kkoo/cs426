@@ -171,14 +171,26 @@ struct ALogEntry *createALogEntry(int logType, char *data, char *hash, char *msg
 	return entry;
 }
 
+char *msgToStr(struct Msg *msg) {
+	char *retStr = (char *)malloc( strlen(intToStr(msg->p)) + strlen(intToStr(msg->id)) + strlen(msg->pke) + strlen(msg->enc) + 10);
+	sprintf(retStr, "%d %d %s %s", msg->p, msg->id, msg->pke, msg->enc);
+	return retStr;
+}
 char *logToStr(struct LogEntry *entry) {
 	char *retStr = (char *)malloc( strlen(intToStr(entry->timestamp)) + strlen(intToStr(entry->timeout)) + strlen(intToStr(entry->logID)) + strlen(entry->message) + 10);
-	sprintf(retStr, "%d %d %d %s\n", entry->timestamp, entry->timeout, entry->logID, entry->message);
+	sprintf(retStr, "%d %d %d %s", entry->timestamp, entry->timeout, entry->logID, entry->message);
 	return retStr;
 }
 
-void printLog(struct LogEntry *entry) {
+char *logToStr2(struct LogEntry *entry) {
+	char *msg = msgToStr(entry->message);
+	char *retStr = (char *)malloc( strlen(intToStr(entry->timestamp)) + strlen(intToStr(entry->timeout)) + strlen(intToStr(entry->logID)) + strlen(msg) + 10);
+	sprintf(retStr, "%d %d %d %s", entry->timestamp, entry->timeout, entry->logID, msg);
+	return retStr;
+}
 
+
+void printLog(struct LogEntry *entry) {
 	printf("Log:%d %d %d %s\n", entry->timestamp, entry->timeout, entry->logID, entry->message);
 	return;
 }
