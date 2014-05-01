@@ -38,6 +38,11 @@ void shell()
 			*/
 			char outputFile[128];
 			sscanf(cmd,"%s %s %s",operation,str,outputFile);
+			FILE *pTest=fopen(str,"rb");
+			if(pTest==NULL) {
+				printf("log does not exist\n");
+				continue;
+			}
 			// TODO: call verify all
 			FILE *fd=fopen(outputFile,"wb");
 			testLog(str, -1,fd);
