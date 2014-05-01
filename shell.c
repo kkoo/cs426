@@ -34,15 +34,17 @@ void shell()
 		char str[128],operation[128];
 		sscanf(cmd,"%s",operation);
 		if(strcmp(operation,"verifyall")==0) {
+			/*
 			if(currentFile==NULL) {
 				printf("no file has been opened\n");
 				continue;
 			}
+			*/
 			char outputFile[128];
 			sscanf(cmd,"%s %s %s",operation,str,outputFile);
 			// TODO: call verify all
 			FILE *fd=fopen(outputFile,"wb");
-			testLog(currentFile, -1,fd);
+			testLog(str, -1,fd);
 			fclose(fd);
 
 			continue;
@@ -61,7 +63,7 @@ void shell()
 			}
 			// TODO: call verify entry function
 			if(entryNo >= 1) {
-				testLog(currentFile, entryNo, stdout);
+				testLog(currentFile, entryNo,stdout);
 			}
 			else {
 				//error
@@ -93,7 +95,7 @@ void shell()
 			currentFile=(char *)malloc(strlen(str)+1);
 			strcpy(currentFile,str);
 
-
+			
 			continue;
 		}
 		printf("Bad command\n");	
