@@ -5,12 +5,22 @@
 
 void shell()
 {
+	FILE *pCert=fopen("cert.pem","rb");
+	if(pCert==NULL) {
+		printf("could not find certificate\n");
+		exit(0);
+
+	}
 	while(1) {
 		char cmd[128];
 		printf("Shell> ");
 		gets(cmd);
 		if(strcmp(cmd,"exit")==0) break;
 		if(strcmp(cmd,"closelog")==0) {
+			if(currentFile==NULL) {
+				printf("no file has been opened\n");
+				continue;
+			}
 			// TODO: call closelog function here
 			if(currentFile==NULL) {
 				printf("no file has been opened\n");
@@ -24,20 +34,34 @@ void shell()
 		char str[128],operation[128];
 		sscanf(cmd,"%s",operation);
 		if(strcmp(operation,"verifyall")==0) {
+			if(currentFile==NULL) {
+				printf("no file has been opened\n");
+				continue;
+			}
 			char outputFile[128];
 			sscanf(cmd,"%s %s %s",operation,str,outputFile);
 			// TODO: call verify all
-			testLog(currentFile, -1);
+			FILE *fd=fopen(outputFile,"wb");
+			testLog(currentFile, -1,fd);
+			fclose(fd);
 
 			continue;
 		}
 		sscanf(cmd,"%s %s",operation,str);
 		if(strcmp(operation,"verify")==0) {
+			if(currentFile==NULL) {
+				printf("no file has been opened\n");
+				continue;
+			}
 			int entryNo;
 			sscanf(str,"%d",&entryNo);
+			if(entryNo<1) {
+				printf("invalid entry number\n");
+				continue;
+			}
 			// TODO: call verify entry function
 			if(entryNo >= 1) {
-				testLog(currentFile, entryNo);
+				testLog(currentFile, entryNo,stdout);
 			}
 			else {
 				//error

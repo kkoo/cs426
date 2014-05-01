@@ -119,7 +119,7 @@ int closeLog(char *fn) {
 
 //verifies log entry
 //verifies all log entry if entryNo = -1
-void testLog(char *fn, int entryNo) {
+void testLog(char *fn, int entryNo, FILE *fd) {
 	int logType;
 	char *data;
 	char *prevHashChain;
@@ -260,7 +260,7 @@ int test(char *fn) {
 	addEntry(fn, "abcdef");
 	addEntry(fn, "abcdef2");
 	closeLog(fn);
-	testLog(fn, -1);
+	testLog(fn, -1,stdout);
 }
 
 int main(int argc, char **argv)
@@ -308,11 +308,11 @@ int main(int argc, char **argv)
 	printf("%d %s %s %s\n",r->logType,r->data,r->hashChain,r->msgAuth);
 	*/
 
-	char *fn = "1.log";
-	test(fn);
+	//char *fn = "1.log";
+	//test(fn);
 
-	//currentFile=NULL;
-	//shell();
+	currentFile=NULL;
+	shell();
 	
 	return 0;
 }
