@@ -42,7 +42,7 @@ void shell()
 			sscanf(cmd,"%s %s %s",operation,str,outputFile);
 			// TODO: call verify all
 			FILE *fd=fopen(outputFile,"wb");
-			testLog(currentFile, -1,fd);
+			testLog(str, -1,fd);
 			fclose(fd);
 
 			continue;
