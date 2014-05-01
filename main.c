@@ -33,13 +33,15 @@ int createLog(char *fn) {
 
 	char *msgAuthCode; 								//Z
 
-	_sessionKey = createFirstKey();				//K
+	//_sessionKey = createFirstKey();				//K
+	_sessionKey = createKey(LOG_INIT, _logAuthKey);
 
 	//create msg for T
 	struct Msg *msg = createMsg(stepNum, ID_UNTRUSTED, PUB_KEY_T, PRIV_KEY_U, _sessionKey, x);
 	
 	//create first log entry
 	char *data = logToStr(createLogEntry(LOG_INIT, logID, msg));
+	//char *data = logToStr2(createLogEntry(LOG_INIT, logID, msg));
 	char *encData = encryptData(data, _sessionKey, strlen(data)); 
 
 	_hashChain = createY(_hashChain, encData, LOG_INIT);
@@ -65,7 +67,7 @@ int createLog(char *fn) {
 	char *x1 = "ZZZ";
 
 	//create session key
-	char *sessionKeyT = createFirstKey();
+	char *sessionKeyT = createKey(RESP_MSG, _logAuthKey);
 	
 	//create msg
 	struct Msg *msg1 = createMsg(p, ID_TRUSTED, PUB_KEY_U, PRIV_KEY_T, sessionKeyT, x1);
@@ -119,7 +121,7 @@ int closeLog(char *fn) {
 
 //verifies log entry
 //verifies all log entry if entryNo = -1
-void testLog(char *fn, int entryNo) {
+void testLog(char *fn, int entryNo, FILE *fd) {
 	int logType;
 	char *data;
 	char *prevHashChain;
@@ -193,14 +195,14 @@ void testLog(char *fn, int entryNo) {
 		i++;
 	}
 	if(logValid == 1 && normalClose == 1) {
-		decryptLog(fn, entryNo);
+		decryptLog(fn, entryNo, fd);
 	}
 	else {
-		printf("Failed verification\n");
+		fprintf(fd, "Failed verification\n");
 	}
 }
 
-void decryptLog(char *fn, int entryNo) {
+void decryptLog(char *fn, int entryNo, FILE *fd) {
 	int logType;
 	char *data;
 	char *prevHashChain;
@@ -227,17 +229,16 @@ void decryptLog(char *fn, int entryNo) {
 			break;
 		}
 
-
-		if(entry->logType == NORMAL_MSG) {
+		if(entry->logType == NORMAL_MSG || entry->logType == LOG_INIT) {
 			//char *decKey = _sessionKey;
-			char *decKey = createKey(NORMAL_MSG, authKey);
+			char *decKey = createKey(entry->logType, authKey);
 			char *text = des_decrypt(decKey, entry->data, strlen(entry->data));
 			if(text != NULL) {
 				if(entryNo == -1) {
-					printf("%s\n", text);
+					fprintf(fd, "%s\n", text);
 				}
 				else if(i-ENTRYNO_OFFSET == entryNo) {
-					printf("%s\n", text);
+					fprintf(fd, "%s\n", text);
 				}
 			}
 		}
@@ -260,7 +261,7 @@ int test(char *fn) {
 	addEntry(fn, "abcdef");
 	addEntry(fn, "abcdef2");
 	closeLog(fn);
-	testLog(fn, -1);
+	testLog(fn, -1, NULL);
 }
 
 int main(int argc, char **argv)
@@ -308,11 +309,11 @@ int main(int argc, char **argv)
 	printf("%d %s %s %s\n",r->logType,r->data,r->hashChain,r->msgAuth);
 	*/
 
-	char *fn = "1.log";
-	test(fn);
+	//char *fn = "1.log";
+	//test(fn);
 
-	//currentFile=NULL;
-	//shell();
+	currentFile=NULL;
+	shell();
 	
 	return 0;
 }

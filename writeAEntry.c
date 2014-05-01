@@ -28,7 +28,7 @@ struct ALogEntry *readAEntry(char* fn, int entryNo)
 			exit(0);
 		}
 		int type;
-		fscanf(pf,"%d\n",&type);
+		if(fscanf(pf,"%d\n",&type)<=0) return NULL;
 		e->logType=type;
 		char *data=(char *)malloc(sizeof(char)*256);
 		char *hc=(char *)malloc(sizeof(char)*256);
@@ -39,7 +39,7 @@ struct ALogEntry *readAEntry(char* fn, int entryNo)
 
 		int index=0;
 		while(1) {
-			fread(&data[index],1,1,pf);
+			if(fread(&data[index],1,1,pf)<=0) return NULL;
 			if(index>=2) {
 				if(data[index]=='\n' && data[index-1]=='\n' && data[index-2]=='\n') {
 					data[index-2]=0;
@@ -52,7 +52,7 @@ struct ALogEntry *readAEntry(char* fn, int entryNo)
 		} //while
 		index=0;
 		while(1) {
-			fread(&hc[index],1,1,pf);
+			if(fread(&hc[index],1,1,pf)<=0) return NULL;
 			if(index>=2) {
 				if(hc[index]=='\n' && hc[index-1]=='\n' && hc[index-2]=='\n') {
 					hc[index-2]=0;
@@ -65,7 +65,7 @@ struct ALogEntry *readAEntry(char* fn, int entryNo)
 		} //while
 		index=0;
 		while(1) {
-			fread(&ma[index],1,1,pf);
+			if(fread(&ma[index],1,1,pf)<=0) return NULL;
 			if(index>=2) {
 				if(ma[index]=='\n' && ma[index-1]=='\n' && ma[index-2]=='\n') {
 					ma[index-2]=0;
