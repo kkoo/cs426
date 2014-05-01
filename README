@@ -1,0 +1,18 @@
+CS426 Final Project
+Qiming Ma(ma70) / Ki Hyun Koo(kkoo)
+
+How to compile:
+	make
+
+How to uninstall:
+	make clean
+
+How to run:
+	./shell
+
+Please notice:
+	You must run "closelog" before running "verifyall."
+	When you create a log, it will be automatically opened for you. You can only open one file at a time.
+	You will not be able to run "add" and "verify" command if there is no file currently opened.
+
+
