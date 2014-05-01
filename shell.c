@@ -34,10 +34,12 @@ void shell()
 		char str[128],operation[128];
 		sscanf(cmd,"%s",operation);
 		if(strcmp(operation,"verifyall")==0) {
+			/*
 			if(currentFile==NULL) {
 				printf("no file has been opened\n");
 				continue;
 			}
+			*/
 			char outputFile[128];
 			sscanf(cmd,"%s %s %s",operation,str,outputFile);
 			// TODO: call verify all
