@@ -274,14 +274,6 @@ void decryptLog(char *fn, int entryNo, FILE *fd) {
 	}
 }
 
-int test(char *fn) {
-	createLog(fn);
-	addEntry(fn, "hello");
-	addEntry(fn, "abcdef");
-	addEntry(fn, "abcdef2");
-	closeLog(fn);
-	testLog(fn, -1, NULL);
-}
 
 int main(int argc, char **argv)
 {
