@@ -1,4 +1,4 @@
-EXE=test
+EXE=shell
 all:
 	gcc -c -g -w main.c 
 	gcc -c -g -w des.c
