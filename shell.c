@@ -92,7 +92,6 @@ void shell()
 			createLog(str);
 			currentFile=(char *)malloc(strlen(str)+1);
 			strcpy(currentFile,str);
-			printf("%s\n",currentFile);
 
 			
 			continue;
