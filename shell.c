@@ -22,10 +22,6 @@ void shell()
 				continue;
 			}
 			// TODO: call closelog function here
-			if(currentFile==NULL) {
-				printf("no file has been opened\n");
-				continue;
-			}
 			closeLog(currentFile);
 
 			continue;
